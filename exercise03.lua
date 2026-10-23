@@ -5,7 +5,7 @@ while true do
     email = string.lower(email)
     local at = string.find(email, "@", 1, true)
 
-    if at == nil then
+    if at == nil or at == 1 or at == #email or string.find(email, "@", at + 1, true) then
        print("Email invalido")
     else
         print("Email valido")
