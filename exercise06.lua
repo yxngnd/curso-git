@@ -6,7 +6,6 @@ local CONFIG = {
 }
 
 local function verifyUser(user)
-
     if type(user.name) ~= "string" then
         return false, "Nome deve ser um texto."
     end
@@ -34,7 +33,6 @@ local function addUser(name, age)
     local isValid, errorMessage = verifyUser(user)
     if not isValid then
         print("Erro: " .. errorMessage)
-        return
     else
         table.insert(users, user)
     end
@@ -53,11 +51,11 @@ local function showUsers()
 end
 
 local function removeUser(index)
-    if(index < 1 or index > #users) then
+    if index < 1 or index > #users then
         print("Indice invalido.")
         return
     end
-    local removedUser =table.remove(users, index)
+    local removedUser = table.remove(users, index)
     print("Usuario ".. removedUser.name .. " foi removido com sucesso.")
 end
 
