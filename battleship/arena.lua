@@ -11,19 +11,32 @@ function arena.createArena(rows, columns)
     return newArena
 end
 
-function arena.displayArena(arena)
-    io.write("   ")
-    for col = 1, #arena[1] do
+function arena.displayArena(playerArena, npcArena)
+    io.write("    ")
+    for col = 1, #playerArena[1] do
+        io.write(string.format("%2d   ", col))
+    end
+
+    io.write("             ")
+
+    for col = 1, #npcArena[1] do
         io.write(string.format("%2d   ", col))
     end
 
     print()
 
-    for row = 1, #arena do
+    for row = 1, math.max(#playerArena, #npcArena) do
         io.write(string.char(64 + row) .. " | ")
-        for col = 1, #arena[row] do
-            io.write(string.format("%2s | ", arena[row][col]))
+        for col = 1, #playerArena[row] do
+            io.write(string.format("%2s | ", playerArena[row][col]))
         end
+
+        io.write("         ")
+        io.write(string.char(64 + row) .. " | ")
+        for col = 1, #npcArena[row] do
+            io.write(string.format("%2s | ", npcArena[row][col]))
+        end
+
         print()
     end
 end
