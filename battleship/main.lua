@@ -1,4 +1,6 @@
-local arena = require("arena")
+local board = require("board")
+
+math.randomseed(os.time())
 
 local command = string.upper(io.read())
 
@@ -9,9 +11,10 @@ print("Command: " .. command)
 print("Column: " .. column)
 print("Row: " .. row)
 
-local playerArena = arena.createArena(10, 10)
-local npcArena = arena.createArena(10, 10)
 
-arena.displayArena(playerArena)
-print("-----------")
-arena.displayArena(npcArena)
+while true do
+    local playerBoard = board.createBoard(10, 10)
+    local npcBoard = board.createBoard(10, 10)
+
+    board.displayBoard(playerBoard, npcBoard)
+end
