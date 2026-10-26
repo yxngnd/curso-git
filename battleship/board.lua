@@ -42,6 +42,11 @@ function board.displayBoard(playerBoard, npcBoard)
 end
 
 function board.placeShip(board, row, column)
+    if not board.isInside(board, row, column) then
+        return false, ""
+    end
+
+    board[row][column] = " N "
 end
 
 function board.placeShipRandom(board, quantity)
@@ -51,9 +56,20 @@ function board.attackBoard(board, row, column)
 end
 
 function board.countShip(board)
+    local count = 0
 end
 
 function board.isInside(board, row, column)
+    if row > #board then
+        return false, ""
+    end
+
+    if column > #board[1] then
+        return false, ""
+    end
+
+    return true, nil
+
 end
 
 return board
