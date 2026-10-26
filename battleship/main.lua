@@ -1,4 +1,5 @@
 local board = require("board")
+local parser = require("parser")
 
 math.randomseed(os.time())
 
