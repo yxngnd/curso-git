@@ -7,7 +7,7 @@ local game = {}
 local CONFIG = {
     BOARD_ROWS = 10,
     BOARD_COLUMNS = 10,
-    SHIP_COUNT = 5
+    SHIP_COUNT = 10
 }
 
 local WINNER = {
