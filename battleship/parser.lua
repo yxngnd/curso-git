@@ -34,13 +34,14 @@ local function parseCoordinate(input, maxRows, maxColumns)
     end
 
     if column < 1 or column > maxColumns then
-        return false, "Columns must be between 1 and " .. maxColumns .. "."
+        return false, "Column must be between 1 and " .. maxColumns .. "."
     end
 
     return row, column
 end
 
 function parser.readCoordinate(maxRows, maxColumns, message)
+    message = message or "Enter the coordinate: "
     while true do
         io.write(message)
         local line = io.read()
