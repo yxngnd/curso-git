@@ -20,7 +20,10 @@ local LAYOUT = {
     ROW_GAP = string.rep(" ", 9),
     HEADER_FORMAT = "%2d   ",
     CELL_FORMAT = "%2s | ",
-    ROW_PREFIX = " | "
+    ROW_PREFIX = " | ",
+    CELL_WIDTH = 5,
+    PLAYER_TITLE = "PLAYER",
+    NPC_TITLE = "NPC"
 }
 
 local CONFIG = {
@@ -72,6 +75,17 @@ local function printRow(grid, row, hideShips)
     end
 end
 
+local function printTitles(grid)
+    local boardWidth = #LAYOUT.HEADER_INDENT + #grid[1] * LAYOUT.CELL_WIDTH
+    local padding = boardWidth + #LAYOUT.HEADER_GAP - #LAYOUT.HEADER_INDENT - #LAYOUT.PLAYER_TITLE
+
+    io.write(LAYOUT.HEADER_INDENT)
+    io.write(LAYOUT.PLAYER_TITLE)
+    io.write(string.rep(" ", padding))
+    io.write(LAYOUT.NPC_TITLE)
+    print()
+end
+
 function board.createBoard(rows, columns)
     if math.type(rows) ~= "integer" or math.type(columns) ~= "integer" then
         return nil, "Quantity of rows and columns must be an integer number."
@@ -105,6 +119,7 @@ function board.displayBoards(playerBoard, npcBoard, revealNpc)
 
     local hideNpcShips = not revealNpc
 
+    printTitles(playerBoard)
     io.write(LAYOUT.HEADER_INDENT)
     printHeader(playerBoard)
     io.write(LAYOUT.HEADER_GAP)
