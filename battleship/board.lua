@@ -24,7 +24,7 @@ local LAYOUT = {
 }
 
 local CONFIG = {
-    MIN_BOARD_SIZE = 2,
+    MIN_BOARD_SIZE = 1,
     MAX_BOARD_SIZE = 10
 }
 
@@ -96,7 +96,7 @@ end
 
 function board.displayBoards(playerBoard, npcBoard)
     if not isValidGrid(playerBoard) or not isValidGrid(npcBoard) then
-        return false, "Invalid board."
+        return false, "Invalid grid."
     end
 
     if #playerBoard ~= #npcBoard or #playerBoard[1] ~= #npcBoard[1] then
@@ -209,6 +209,26 @@ function board.countShips(grid)
     end
 
     return counter
+end
+
+function board.getAttackableCells(grid)
+    if not isValidGrid(grid) then
+        return {}
+    end
+
+    local cells = {}
+
+    for i = 1, #grid do
+        local line = grid[i]
+        for j = 1, #line do
+            local cell = line[j]
+            if cell == board.CELL.WATER or cell == board.CELL.SHIP then
+                cells[#cells + 1] = { row = i, column = j }
+            end
+        end
+    end
+
+    return cells
 end
 
 return board
