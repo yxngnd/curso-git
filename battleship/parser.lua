@@ -43,6 +43,7 @@ end
 function parser.readCoordinate(maxRows, maxColumns, message)
     message = message or "Enter the coordinate: "
     while true do
+        print()
         io.write(message)
         local line = io.read()
 

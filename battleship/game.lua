@@ -75,7 +75,7 @@ local function setupPlayer(grid, quantity)
     board.displaySingleBoard(grid)
 
     while placed < quantity do
-        print(string.format("Ship %d of %d.", placed + 1, quantity))
+        print(string.format("Select the position for ship %d of %d.", placed + 1, quantity))
         local row, columnOrError = parser.readCoordinate(rows, columns, "Ship position (e.g., A1): ")
 
         if not row then
