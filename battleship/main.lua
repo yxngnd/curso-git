@@ -17,5 +17,5 @@ while true do
     local playerBoard = board.createBoard(10, 10)
     local npcBoard = board.createBoard(10, 10)
 
-    board.displayBoard(playerBoard, npcBoard)
+    board.displayBoards(playerBoard, npcBoard)
 end
