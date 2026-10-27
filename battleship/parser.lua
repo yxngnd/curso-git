@@ -2,47 +2,57 @@ local parser = {}
 
 local FIRST_LETTER_CODE = string.byte("A")
 
+local function trim(text)
+    return string.match(text, "^%s*(.-)%s*$")
+end
+
 function parser.parseCoordinate(input, maxRows, maxColumns)
     if type(input) ~= "string" then
-        return nil
+        return false, "Input must be text."
     end
 
-    local letter, digits = string.match(string.upper(input), "^([A-Z])(%d+)$")
+    if math.type(maxRows) ~= "integer" or math.type(maxColumns) ~= "integer" then
+        return false, "Invalid board size."
+    end
+
+    local text = string.upper(trim(input))
+    local letter, digits = string.match(text, "^([A-Z])(%d+)$")
 
     if not letter then
-        return nil
+        return false, "Invalid format. Use a letter + number combination."
     end
 
     local row = string.byte(letter) - FIRST_LETTER_CODE + 1
-    local column = tonumber(digits)
+    local column = math.tointeger(tonumber(digits))
 
-    if row < 1 or row > maxRows or column < 1 or column > maxColumns then
-        return nil
+    if row > maxRows then
+        return false, "Row '" .. letter .. "' is outside the board."
+    end
+
+    if column < 1 or column > maxColumns then
+        return false, "Columns must be between 1 and " .. maxColumns .. "."
     end
 
     return row, column
 end
 
 function parser.readCoordinate(maxRows, maxColumns)
-    local row, column
-
-    repeat
+    while true do
         io.write("Enter the coordinate (e.g., A1): ")
         local line = io.read()
 
         if line == nil then
-            return nil
+            return false, "End of input."
         end
 
-        local input = string.match(line, "^%s*(.-)%s*$")
-        row, column = parser.parseCoordinate(input, maxRows, maxColumns)
+        local row, columnOrError = parser.parseCoordinate(line, maxRows, maxColumns)
 
-        if not row then
-            print("Invalid coordinate. Use a letter + number combination, within the board.")
+        if row then
+            return row, columnOrError
         end
-    until row
 
-    return row, column
+        print(columnOrError)
+    end
 end
 
 return parser
