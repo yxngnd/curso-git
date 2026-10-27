@@ -1,38 +1,48 @@
 local board = {}
 
 local FIRST_LETTER_CODE = string.byte("A")
-local CELL = {
+board.CELL = {
     WATER = " ",
     SHIP = "S",
     HIT = "X",
     MISS = "O"
 }
 
+board.RESULT = {
+    HIT = "hit",
+    MISS = "miss",
+    ALREADY_ATTACKED = "already_attacked"
+}
+
 local LAYOUT = {
     HEADER_INDENT = string.rep(" ", 4),
-    HEADER_GAP = string.rep(" ", 13),
+    HEADER_GAP = string.rep(" ", 9 + 4),
     ROW_GAP = string.rep(" ", 9),
-    HEADER_FORMAT = "%2d  ",
+    HEADER_FORMAT = "%2d   ",
     CELL_FORMAT = "%2s | ",
     ROW_PREFIX = " | "
 }
 
+local CONFIG = {
+    MIN_BOARD_SIZE = 2,
+    MAX_BOARD_SIZE = 10
+}
+
+local function isValidGrid(grid)
+    return type(grid) == "table" and #grid > 0 and type(grid[1]) == "table" and #grid[1] > 0
+end
+
 local function isInside(grid, row, column)
-
-    if type(grid) ~= "table" or #grid == 0 then
-        return false
+    if not isValidGrid(grid) then
+        return false, "Invalid grid."
     end
 
-    if type(row) ~= "number" or math.type(row) ~= "integer" then
-        return false
-    end
-
-    if type(column) ~= "number" or math.type(column) ~= "integer" then
-        return false
+    if math.type(row) ~= "integer" or math.type(column) ~= "integer" then
+        return false, "Row and column must be integers."
     end
 
     if row < 1 or row > #grid or column < 1 or column > #grid[1] then
-        return false
+        return false, "Position out of bounds."
     end
 
     return true
@@ -41,8 +51,8 @@ end
 local function getVisibleCell(grid, row, column, hideShips)
     local cell = grid[row][column]
 
-    if hideShips and cell == CELL.SHIP then
-        return CELL.WATER
+    if hideShips and cell == board.CELL.SHIP then
+        return board.CELL.WATER
     end
 
     return cell
@@ -50,33 +60,34 @@ end
 
 local function printHeader(grid)
     for col = 1, #grid[1] do
-        io.write(string.format("%2d   ", col))
+        io.write(string.format(LAYOUT.HEADER_FORMAT, col))
     end
 end
 
 local function printRow(grid, row, hideShips)
-    io.write(string.char(FIRST_LETTER_CODE + row - 1) .. " | ")
+    io.write(string.char(FIRST_LETTER_CODE + row - 1) .. LAYOUT.ROW_PREFIX)
 
-    for col = 1, #grid[row] do
-        io.write(string.format("%2s | ", getVisibleCell(grid, row, col, hideShips)))
+    for col = 1, #grid[1] do
+        io.write(string.format(LAYOUT.CELL_FORMAT, getVisibleCell(grid, row, col, hideShips)))
     end
 end
 
 function board.createBoard(rows, columns)
-    local newBoard = {}
-
     if math.type(rows) ~= "integer" or math.type(columns) ~= "integer" then
         return nil, "Quantity of rows and columns must be an integer number."
     end
 
-    if rows <= 1 or columns <= 1 then
-        return nil, "Board must have more than 1 row/column."
+    if rows < CONFIG.MIN_BOARD_SIZE or columns < CONFIG.MIN_BOARD_SIZE or
+        rows > CONFIG.MAX_BOARD_SIZE or columns > CONFIG.MAX_BOARD_SIZE then
+        return nil, "Board size must be between " .. CONFIG.MIN_BOARD_SIZE .. " and " .. CONFIG.MAX_BOARD_SIZE .. "."
     end
+
+    local newBoard = {}
 
     for i = 1, rows do
         newBoard[i] = {}
         for j = 1, columns do
-            newBoard[i][j] = CELL.WATER
+            newBoard[i][j] = board.CELL.WATER
         end
     end
 
@@ -84,23 +95,23 @@ function board.createBoard(rows, columns)
 end
 
 function board.displayBoards(playerBoard, npcBoard)
-    if not playerBoard or not npcBoard then
-        return false, "Empty boards."
+    if not isValidGrid(playerBoard) or not isValidGrid(npcBoard) then
+        return false, "Invalid board."
     end
 
-    if #playerBoard ~= #npcBoard then
+    if #playerBoard ~= #npcBoard or #playerBoard[1] ~= #npcBoard[1] then
         return false, "Boards must have the same size."
     end
 
-    io.write("    ")
+    io.write(LAYOUT.HEADER_INDENT)
     printHeader(playerBoard)
-    io.write("             ")
+    io.write(LAYOUT.HEADER_GAP)
     printHeader(npcBoard)
     print()
 
     for row = 1, #playerBoard do
         printRow(playerBoard, row, false)
-        io.write("         ")
+        io.write(LAYOUT.ROW_GAP)
         printRow(npcBoard, row, true)
         print()
     end
@@ -115,48 +126,50 @@ function board.placeShip(grid, row, column)
         return false, err
     end
 
-    if grid[row][column] ~= CELL.WATER then
+    if grid[row][column] ~= board.CELL.WATER then
         return false, "Position already occupied."
     end
 
-    grid[row][column] = CELL.SHIP
+    grid[row][column] = board.CELL.SHIP
 
     return true
 end
 
-function board.placeShipRandom(grid, quantity)
+function board.placeShipsRandom(grid, quantity)
+    if not isValidGrid(grid) then
+        return false, "Invalid grid."
+    end
+
+    if math.type(quantity) ~= "integer" or quantity <= 0 then
+        return false, "Quantity of ships must be an integer greater than 0."
+    end
+
     local rows = #grid
     local columns = #grid[1]
-
-    if quantity <= 0 then
-        return false, "Quantity of ships must be greater than 0."
-    end
 
     local free = {}
     for i = 1, rows do
         for j = 1, columns do
-            if grid[i][j] == CELL.WATER then
+            if grid[i][j] == board.CELL.WATER then
                 free[#free + 1] = { i, j }
             end
         end
     end
 
-    if quantity > #free then
+    local total = #free
+    if quantity > total then
         return false, "Too many ships."
     end
 
-    -- Fisher-Yates
     for i = 1, quantity do
-        local j = math.random(i, #free)
+        local j = math.random(i, total)
         free[i], free[j] = free[j], free[i]
 
-        local ok, err = board.placeShip(grid, free[i][1], free[i][2])
-        if not ok then
-            return false, err, i - 1
-        end
+        local row, column = free[i][1], free[i][2]
+        grid[row][column] = board.CELL.SHIP
     end
 
-    return true, quantity
+    return true
 end
 
 function board.attackBoard(grid, row, column)
@@ -167,25 +180,29 @@ function board.attackBoard(grid, row, column)
     end
 
     local cell = grid[row][column]
-    if cell == CELL.SHIP then
-        grid[row][column] = CELL.HIT
-        return true, "hit"
+    if cell == board.CELL.SHIP then
+        grid[row][column] = board.CELL.HIT
+        return true, board.RESULT.HIT
     end
 
-    if cell == CELL.WATER then
-        grid[row][column] = CELL.MISS
-        return true, "miss"
+    if cell == board.CELL.WATER then
+        grid[row][column] = board.CELL.MISS
+        return true, board.RESULT.MISS
     end
 
-    return false, "already_attacked"
+    return false, board.RESULT.ALREADY_ATTACKED
 end
 
 function board.countShips(grid)
+    if not isValidGrid(grid) then
+        return 0
+    end
+
     local counter = 0
 
     for i = 1, #grid do
-        for j = 1, #grid[1] do
-            if grid[i][j] == CELL.SHIP then
+        for j = 1, #grid[i] do
+            if grid[i][j] == board.CELL.SHIP then
                 counter = counter + 1
             end
         end
