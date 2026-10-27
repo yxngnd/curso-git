@@ -94,7 +94,7 @@ function board.createBoard(rows, columns)
     return newBoard
 end
 
-function board.displayBoards(playerBoard, npcBoard)
+function board.displayBoards(playerBoard, npcBoard, revealNpc)
     if not isValidGrid(playerBoard) or not isValidGrid(npcBoard) then
         return false, "Invalid grid."
     end
@@ -102,6 +102,8 @@ function board.displayBoards(playerBoard, npcBoard)
     if #playerBoard ~= #npcBoard or #playerBoard[1] ~= #npcBoard[1] then
         return false, "Boards must have the same size."
     end
+
+    local hideNpcShips = not revealNpc
 
     io.write(LAYOUT.HEADER_INDENT)
     printHeader(playerBoard)
@@ -112,7 +114,7 @@ function board.displayBoards(playerBoard, npcBoard)
     for row = 1, #playerBoard do
         printRow(playerBoard, row, false)
         io.write(LAYOUT.ROW_GAP)
-        printRow(npcBoard, row, true)
+        printRow(npcBoard, row, hideNpcShips)
         print()
     end
 
@@ -236,9 +238,8 @@ function board.getAttackableCells(grid)
     local cells = {}
 
     for i = 1, #grid do
-        local line = grid[i]
-        for j = 1, #line do
-            local cell = line[j]
+        for j = 1, #grid[1] do
+            local cell = grid[i][j]
             if cell == board.CELL.WATER or cell == board.CELL.SHIP then
                 cells[#cells + 1] = { row = i, column = j }
             end
@@ -256,7 +257,7 @@ function board.getSize(grid)
     return #grid, #grid[1]
 end
 
-function board.formatCoodinate(row, column)
+function board.formatCoordinate(row, column)
     return string.char(FIRST_LETTER_CODE + row - 1) .. column
 end
 
