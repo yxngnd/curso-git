@@ -1,5 +1,6 @@
 local board = require("board")
 local parser = require("parser")
+local npc = require("npc")
 
 local game = {}
 
@@ -61,7 +62,6 @@ function game.playerTurn(npcGrid, stats)
     end
 
     local rows, columns = board.getSize(npcGrid)
-
     if not rows then
         return false, columns
     end
@@ -79,11 +79,12 @@ function game.playerTurn(npcGrid, stats)
         if ok then
             registerResult(stats.player, result)
 
+            local coordinate = board.formatCoordinate(row, column)
             local message
             if result == board.RESULT.HIT then
-                message = "You hit an enemy ship!"
+                message = "You hit an enemy ship at " .. coordinate .. "!"
             else
-                message = "You missed."
+                message = "You missed at " .. coordinate .. "."
             end
 
             print(message)
@@ -99,11 +100,51 @@ function game.playerTurn(npcGrid, stats)
 end
 
 function game.npcTurn(playerGrid, stats)
+    if type(stats) ~= "table" or type(stats.npc) ~= "table" then
+        return false, "Invalid stats."
+    end
 
+    local row, columnOrError = npc.chooseAttack(playerGrid)
+
+    if not row then
+        error("NPC could not choose an attack: " .. columnOrError)
+    end
+
+    local column = columnOrError
+    local ok, result = board.attackBoard(playerGrid, row, column)
+
+    if not ok then
+        error("NPC attack failed: " .. result)
+    end
+
+    registerResult(stats.npc, result)
+
+    local coordinate = board.formatCoordinate(row, column)
+    local message
+    if result == board.RESULT.HIT then
+        message = "The NPC attacked " .. coordinate .. " and hit one of your ships!"
+    else
+        message = "The NPC attacked " .. coordinate .. " and missed."
+    end
+
+    print(message)
+    return true, result
 end
 
 function game.checkVictory(playerGrid, npcGrid)
+    if not board.getSize(playerGrid) or not board.getSize(npcGrid) then
+        return false, "Invalid grid."
+    end
 
+    if board.countShips(npcGrid) == 0 then
+        return "player"
+    end
+
+    if board.countShips(playerGrid) == 0 then
+        return "npc"
+    end
+
+    return nil
 end
 
 function game.run()

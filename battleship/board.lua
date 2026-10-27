@@ -256,4 +256,8 @@ function board.getSize(grid)
     return #grid, #grid[1]
 end
 
+function board.formatCoodinate(row, column)
+    return string.char(FIRST_LETTER_CODE + row - 1) .. column
+end
+
 return board

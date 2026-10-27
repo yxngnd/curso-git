@@ -6,7 +6,7 @@ local function trim(text)
     return string.match(text, "^%s*(.-)%s*$")
 end
 
-function parser.parseCoordinate(input, maxRows, maxColumns)
+local function parseCoordinate(input, maxRows, maxColumns)
     if type(input) ~= "string" then
         return false, "Input must be text."
     end
@@ -36,16 +36,16 @@ function parser.parseCoordinate(input, maxRows, maxColumns)
     return row, column
 end
 
-function parser.readCoordinate(maxRows, maxColumns)
+function parser.readCoordinate(maxRows, maxColumns, message)
+    io.write(message)
     while true do
-        io.write("Enter the coordinate (e.g., A1): ")
         local line = io.read()
 
         if line == nil then
             return false, "End of input."
         end
 
-        local row, columnOrError = parser.parseCoordinate(line, maxRows, maxColumns)
+        local row, columnOrError = parseCoordinate(line, maxRows, maxColumns)
 
         if row then
             return row, columnOrError
