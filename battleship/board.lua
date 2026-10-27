@@ -119,6 +119,23 @@ function board.displayBoards(playerBoard, npcBoard)
     return true
 end
 
+function board.displaySingleBoard(grid)
+    if not isValidGrid(grid) then
+        return false, "Invalid grid."
+    end
+
+    io.write(LAYOUT.HEADER_INDENT)
+    printHeader(grid)
+    print()
+
+    for row = 1, #grid do
+        printRow(grid, row)
+        print()
+    end
+
+    return true
+end
+
 function board.placeShip(grid, row, column)
     local inside, err = isInside(grid, row, column)
 
@@ -201,7 +218,7 @@ function board.countShips(grid)
     local counter = 0
 
     for i = 1, #grid do
-        for j = 1, #grid[i] do
+        for j = 1, #grid[1] do
             if grid[i][j] == board.CELL.SHIP then
                 counter = counter + 1
             end
@@ -229,6 +246,14 @@ function board.getAttackableCells(grid)
     end
 
     return cells
+end
+
+function board.getSize(grid)
+    if not isValidGrid(grid) then
+        return nil, "Invalid grid."
+    end
+
+    return #grid, #grid[1]
 end
 
 return board
