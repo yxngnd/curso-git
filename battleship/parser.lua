@@ -25,6 +25,10 @@ local function parseCoordinate(input, maxRows, maxColumns)
     local row = string.byte(letter) - FIRST_LETTER_CODE + 1
     local column = math.tointeger(tonumber(digits))
 
+    if not column then
+        return false, "Column number is invalid."
+    end
+
     if row > maxRows then
         return false, "Row '" .. letter .. "' is outside the board."
     end
@@ -37,8 +41,8 @@ local function parseCoordinate(input, maxRows, maxColumns)
 end
 
 function parser.readCoordinate(maxRows, maxColumns, message)
-    io.write(message)
     while true do
+        io.write(message)
         local line = io.read()
 
         if line == nil then
